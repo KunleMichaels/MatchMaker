@@ -4,7 +4,7 @@ var app = express();
 var path = require('path');
 var server = require('http').createServer(app);
 var io = require('socket.io')(server);
-var port = process.env.PORT || 3000;
+var port = process.env.PORT || 5000;
 
 server.listen(port, () => {
   console.log('Server listening at port %d', port);
@@ -19,7 +19,7 @@ var gameCollection =  new function() {
 
     this.totalgameCount = 0,
     this.gameList = {}
-  
+
   };
 
 // Chatroom
@@ -84,19 +84,27 @@ io.on('connection', (socket) => {
   });
 
   //when the client  requests to make a Game
-  socket.on('makeGame', function () {
+  //Join into an Existing Game
+  function joinGame(){
+  socket.emit('joinGame');
+  };
 
-    var gameId = (Math.random()+1).toString(36).slice(2, 18);
-    console.log("Game Created by "+ socket.username + " w/ " + gameId);
-    gameCollection.gameList.gameId = gameId
-    gameCollection.gameList.gameId.playerOne = socket.username;
-    gameCollection.gameList.gameId.open = true;
-    gameCollection.totalGameCount ++;
+  socket.on('joinSuccess', function (data) {
+  log('Joining the following game: ' + data.gameId);
+  });
 
-   io.emit('gameCreated', {
-     username: socket.username,
-     gameId: gameId
-   });
 
- });
+  //Response from Server on existing User found in a game
+  socket.on('alreadyJoined', function (data) {
+  log('You are already in an Existing Game: ' + data.gameId);
+  });
+
+
+  function leaveGame(){
+  socket.emit('leaveGame');
+  };
+
+  socket.on('leftGame', function (data) {
+  log('Leaving Game ' + data.gameId);
+  });
 });
