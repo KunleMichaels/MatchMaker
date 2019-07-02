@@ -15,7 +15,10 @@ $(function() {
   
     var $loginPage = $('.login.page'); // The login page
     var $chatPage = $('.chat.page'); // The chatroom page
-  
+    
+    var $createGame = $('.createGame'); 
+    var $joinGame = $('.joinGame');
+
     // Prompt for setting a username
     var username;
     var connected = false;
@@ -28,9 +31,9 @@ $(function() {
     const addParticipantsMessage = (data) => {
       var message = '';
       if (data.numUsers === 1) {
-        message += "there's 1 participant";
-      } else {
-        message += "there are " + data.numUsers + " participants";
+        message += "Crickets...It's Just YOU and ME -Robot";
+        } else {
+        message += "there are " + data.numUsers + " players in the Lobby";
       }
       log(message);
     }
@@ -217,11 +220,17 @@ $(function() {
     $loginPage.click(() => {
       $currentInput.focus();
     });
+    
   
     // Focus input when clicking on the message input's border
     $inputMessage.click(() => {
       $inputMessage.focus();
     });
+
+    $createGame.click(function () {
+        sendGame();
+    
+      })
   
     // Socket events
   
@@ -278,5 +287,15 @@ $(function() {
     socket.on('reconnect_error', () => {
       log('attempt to reconnect has failed');
     });
+
+    socket.on('gameCreated', function (data) {
+        console.log("Game Created! ID is: " + data.gameId)
+        log(data.username + ' created Game: ' + data.gameId);
+        //alert("Game Created! ID is: "+ JSON.stringify(data));
+      });
+    
+    function sendGame(){
+      socket.emit('makeGame');
+    };
   
   });

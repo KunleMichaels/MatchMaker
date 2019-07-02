@@ -13,6 +13,15 @@ server.listen(port, () => {
 // Routing
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Entire GameCollection Object holds all games and info
+
+var gameCollection =  new function() {
+
+    this.totalgameCount = 0,
+    this.gameList = {}
+  
+  };
+
 // Chatroom
 
 var numUsers = 0;
@@ -73,4 +82,21 @@ io.on('connection', (socket) => {
       });
     }
   });
+
+  //when the client  requests to make a Game
+  socket.on('makeGame', function () {
+
+    var gameId = (Math.random()+1).toString(36).slice(2, 18);
+    console.log("Game Created by "+ socket.username + " w/ " + gameId);
+    gameCollection.gameList.gameId = gameId
+    gameCollection.gameList.gameId.playerOne = socket.username;
+    gameCollection.gameList.gameId.open = true;
+    gameCollection.totalGameCount ++;
+
+   io.emit('gameCreated', {
+     username: socket.username,
+     gameId: gameId
+   });
+
+ });
 });
